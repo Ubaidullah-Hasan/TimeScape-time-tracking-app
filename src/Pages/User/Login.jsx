@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { RiLoginCircleLine } from 'react-icons/ri'; // Using React Icons for login button
 import { HiOutlineMail } from "react-icons/hi";
 import { IoKeyOutline } from "react-icons/io5";
@@ -6,9 +6,28 @@ import { FaRegFaceRollingEyes } from "react-icons/fa6";
 import { PiSmileyXEyes } from "react-icons/pi";
 import { FaFacebookF, FaGoogle } from "react-icons/fa";
 import { useOutletContext } from 'react-router-dom';
+import SocialLogin from './SocialLogin';
+import { AuthContext } from '../../Providers/AuthProviders';
 
 const Login = () => {
     const [isPassword, setIsPassword] = useOutletContext();
+    const { signInUser } = useContext(AuthContext);
+    const [error, setError] = useState(false);
+
+    const handleForm = (event) => {
+        event.preventDefault();
+        const email = event.target.email.value;
+        const password = event.target.password.value;
+        signInUser(email, password)
+            .then(success => {
+                setError(false);
+                console.log(success.user)
+            })
+            .catch(error => {
+                setError(true);
+                console.log(error.message)
+            })
+    };
 
 
     return (
@@ -16,15 +35,15 @@ const Login = () => {
             <h2 className="text-2xl font-cinzel font-extrabold uppercase mb-4">
                 Welcome Back
             </h2>
-            <form>
-                <div className="mb-4 flex items-center border rounded-md p-2">
+            <form onSubmit={handleForm}>
+                <div className={`mb-4 flex items-center border rounded-md p-2 ${error && 'border-red-500'}`}>
                     <HiOutlineMail className="mr-2" />
-                    <input type="email" placeholder="Email" className="flex-1 outline-none" />
+                    <input defaultValue={"hm2964133@gmail.com"} type="email" name='email' placeholder="Email" required className="flex-1 outline-none" />
                 </div>
 
-                <div className="mb-4 flex items-center border rounded-md p-2">
+                <div className={`mb-4 flex items-center border rounded-md p-2 ${error && 'border-red-500'}`}>
                     <IoKeyOutline className="mr-2" />
-                    <input type={isPassword ? "password" : "text"} placeholder="Password" className="flex-1 outline-none" />
+                    <input defaultValue={"admin123"} type={isPassword ? "password" : "text"} name='password' required placeholder="Password" className="flex-1 outline-none" />
                     {
                         isPassword ?
                             <FaRegFaceRollingEyes onClick={() => setIsPassword(!isPassword)} className="ms-2" />
@@ -38,23 +57,10 @@ const Login = () => {
                     Login
                 </button>
             </form>
-
-            {/* or devider */}
-            <div className='mb-4 flex items-center justify-between gap-4'>
-                <hr className='border border-gray-200 border-dashed	 w-[35%] ' />
-                <p className='uppercase '>or login with</p>
-                <hr className='border border-gray-200 border-dashed	 w-[35%] ' />
-            </div>
-
-            {/* google and facebook login */}
-            <div className='flex justify-between gap-8'>
-                <button className='duration-300 grow py-3 rounded-md border border-[#EA4335] hover:bg-[#EA4335] text-[#EA4335] hover:text-white flex items-center justify-center'>
-                    <FaGoogle />
-                </button>
-                <button className='duration-300 grow py-3 rounded-md border border-[#316FF6] hover:bg-[#316FF6] text-[#316FF6] hover:text-white flex items-center justify-center'>
-                    <FaFacebookF />
-                </button>
-            </div>
+                    {
+                        error && <p className='text-red-500 mb-4'>Wrong Info, Try Again!</p>
+                    }
+            <SocialLogin />
         </div>
     );
 };
